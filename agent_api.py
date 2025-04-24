@@ -1,6 +1,11 @@
+import asyncio
+import sys
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 from fastapi import FastAPI
 from pydantic import BaseModel
-import asyncio
+
 import time
 import os
 from perception import extract_perception
@@ -21,32 +26,40 @@ class AgentState:
 
 agent_state = AgentState()
 
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Establish MCP server connection and bootstrap agent state
     server_params = StdioServerParameters(
         command="python",
         args=["example3.py"]
-        # cwd omitted to use current directory
     )
+    mcp_initialized = False
     try:
-        agent_state.session_context = stdio_client(server_params)
-        agent_state.session_cm = agent_state.session_context.__aenter__()
-        agent_state.read, agent_state.write = await agent_state.session_cm
-        agent_state.session = await ClientSession(agent_state.read, agent_state.write).__aenter__()
-        tools_result = await agent_state.session.list_tools()
-        agent_state.tools = tools_result.tools
-        agent_state.tool_descriptions = "\n".join(
-            f"- {tool.name}: {getattr(tool, 'description', 'No description')}"
-            for tool in agent_state.tools
-        )
-        agent_state.memory = MemoryManager()
-        agent_state.session_id = f"session-{int(time.time())}"
-        print("[startup] Agent server initialized.")
-        yield
-    except Exception as e:
-        print(f"[startup] Failed to initialize agent server: {e}")
-        raise
+        try:
+            async with stdio_client(server_params) as (read, write):
+                agent_state.read = read
+                agent_state.write = write
+                async with ClientSession(read, write) as session:
+                    agent_state.session = session
+                    tools_result = await session.list_tools()
+                    agent_state.tools = tools_result.tools
+                    agent_state.tool_descriptions = "\n".join(
+                        f"- {tool.name}: {getattr(tool, 'description', 'No description')}"
+                        for tool in agent_state.tools
+                    )
+                    agent_state.memory = MemoryManager()
+                    agent_state.session_id = f"session-{int(time.time())}"
+                    print("[startup] Agent server initialized.")
+                    mcp_initialized = True
+        except Exception as e:
+            print(f"[startup] Failed to initialize agent server: {e}")
+            # Optionally, log the traceback here for more details
+        yield  # Always yield so FastAPI server starts, even if MCP fails
+    finally:
+        if not mcp_initialized:
+            print("[startup] MCP not initialized; server is running in degraded mode.")
+
 
 app = FastAPI(lifespan=lifespan)
 
