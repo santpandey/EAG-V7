@@ -1,0 +1,18 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    min-width: 220px;
+}
+#queryBox {
+    width: 200px;
+    padding: 6px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+#submitBtn {
+    padding: 6px 16px;
+    font-size: 14px;
+    cursor: pointer;
+}
