@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Clear previous state
+    document.getElementById('queryBox').value = '';
+    // Add close button logic
+    document.getElementById('closeBtn').addEventListener('click', function() {
+        window.close();
+    });
     document.getElementById('submitBtn').addEventListener('click', async function() {
         const query = document.getElementById('queryBox').value.trim();
         if (!query) {
