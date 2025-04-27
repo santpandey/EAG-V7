@@ -66,7 +66,10 @@ async def lifespan(app: FastAPI):
             print("[startup] MCP not initialized; server is running in degraded mode.")
 
 
+from web_capture_api import router as web_capture_router
+
 app = FastAPI(lifespan=lifespan)
+app.include_router(web_capture_router)
 
 class AgentRequest(BaseModel):
     user_input: str

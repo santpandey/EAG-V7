@@ -3,16 +3,23 @@ import sys
 import time
 import os
 import datetime
-from perception import extract_perception
-from memory import MemoryManager, MemoryItem
-from decision import generate_plan
-from action import execute_tool
+from app.perception import extract_perception
+from app.memory import MemoryManager, MemoryItem
+from app.decision import generate_plan
+from app.action import execute_tool
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
  # use this to connect to running server
 
 import shutil
 import sys
+
+# Mount the web_capture_api router to the FastAPI app if running as API
+from fastapi import FastAPI
+app = FastAPI()
+
+from app.web_capture_api import router as web_capture_router
+app.include_router(web_capture_router)
 
 def log(stage: str, msg: str):
     now = datetime.datetime.now().strftime("%H:%M:%S")

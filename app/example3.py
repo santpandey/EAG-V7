@@ -13,7 +13,7 @@ from pathlib import Path
 import requests
 from markitdown import MarkItDown
 import time
-from models import AddInput, AddOutput, SqrtInput, SqrtOutput, StringsToIntsInput, StringsToIntsOutput, ExpSumInput, ExpSumOutput
+from app.models import AddInput, AddOutput, SqrtInput, SqrtOutput, StringsToIntsInput, StringsToIntsOutput, ExpSumInput, ExpSumOutput
 from PIL import Image as PILImage
 from tqdm import tqdm
 import hashlib
@@ -242,8 +242,8 @@ def process_documents():
 
         mcp_log("PROC", f"Processing: {file.name}")
         try:
-            #result = converter.convert(str(file))
-            result = str(file)
+            result = converter.convert(str(file))
+            #result = str(file)
             markdown = result.text_content
             chunks = list(chunk_text(markdown))
             embeddings_for_file = []

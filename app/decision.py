@@ -1,5 +1,5 @@
-from perception import PerceptionResult
-from memory import MemoryItem
+from app.perception import PerceptionResult
+from app.memory import MemoryItem
 from typing import List, Optional
 from dotenv import load_dotenv
 from google import genai
